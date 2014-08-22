@@ -18,4 +18,9 @@
         android:inputType="textMultiLine" >
 
     </EditText>
+    <FrameLayout
+      android:id="@+id/placeholder"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent" android:background="@drawable/floorplan_small">
+  </FrameLayout>
 </RelativeLayout>
