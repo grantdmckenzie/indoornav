@@ -8,7 +8,11 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,13 +52,13 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     private IBeaconManager iBeaconManager = IBeaconManager.getInstanceForApplication(this);
     private static int userx_prev;
     private static int usery_prev;
-    private static float multiple = 1.0f;	// EDIT
+    private static float multiple = 4.0f;	// EDIT
     double localmult = 0; //multiple;   // EDIT
     private static int[] userloc;
     //private static int[][] ble_locs = {{(int)(4*multiple),0},{0, 3*multiple},{(int)(4*multiple),6*multiple},{0, 9*multiple},{(int)(4*multiple),12*multiple},{0, 15*multiple},{4*multiple, 18*multiple},{0, 21*multiple},{4*multiple, 24*multiple}};
     private static JSONArray ibeacon_locations;
     private static float[] ble_rad = new float[21];
-    private static float[] ble_rad_prev = new float[21];
+    private static ArrayList<ble> ble_rad_prev = new ArrayList<ble>();
     private static Bitmap floorplan;
     public OutputStreamWriter myOutWriter;
     public FileOutputStream fOut;
@@ -151,74 +155,152 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     public void onIBeaconServiceConnect() {
     	Log.v("iBeacon", "onIBeaconServiceConnect");
         iBeaconManager.setRangeNotifier(new RangeNotifier() {
-        @Override 
-        public void didRangeBeaconsInRegion(Collection<IBeacon> iBeacons, Region region) {
-        	//Log.v("iBeacon", "didRangeBeaconsInRegion");
-        	//Log.v("iBeacon", "iBeacon Array Size: "+iBeacons.size());
-        	int ble_closestx = 500;
-        	int ble_closesty = 500;
-        	int ble_closest_id = 0;
-        	int[] lowest3 = new int[3];
-            if (iBeacons.size() > 0) {
-            	//Log.v("iBeacon", ""+iBeacons.size());
-            	
-            	double minval = 300.0;
-	    	    for (IBeacon iBeacon : iBeacons) {  
-	    	    	if (iBeacon.getMinor() > 0) {
-	    	    		if (iBeacon.getAccuracy()*multiple > ble_rad_prev[iBeacon.getMinor() - 1] + 1)
-	    	    			ble_rad[iBeacon.getMinor() - 1] = (float)(iBeacon.getAccuracy()*multiple + 1);
-	    	    		else if (iBeacon.getAccuracy()*multiple < ble_rad_prev[iBeacon.getMinor() - 1] - 1)
-	    	    			ble_rad[iBeacon.getMinor() - 1] = (float)(iBeacon.getAccuracy()*multiple - 1);
-	    	    		else
-	    	    			ble_rad[iBeacon.getMinor() - 1] = (float)(iBeacon.getAccuracy()*multiple); //*2/3 + (float)(ble_rad_prev[iBeacon.getMinor() - 1]*1/3);
-	    	    		
-	    	    		try {
-							write2File(iBeacon.getMinor()+","+iBeacon.getAccuracy()+","+iBeacon.getProximity()+","+iBeacon.getRssi());
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-	    	    		/*if (iBeacon.getAccuracy() < minval) {
-	    	    			minval = iBeacon.getAccuracy();
-	    	    			try {
-								ble_closestx = ibeacon_locations.getJSONArray(iBeacon.getMinor() - 1).getInt(0);
-								ble_closesty = ibeacon_locations.getJSONArray(iBeacon.getMinor() - 1).getInt(1);
-							} catch (JSONException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-	    	    			ble_closest_id = iBeacon.getMinor();
-	    	    		}*/
-	    	    	}
-	    	    	
-	    	    	//Log.v("iBeacon", "minor beacon: "+iBeacon.getMinor() + ": " + iBeacon.getAccuracy());
-	    	    }
-	    	    lowest3 = getLowestThree(ble_rad);
-	    	    for(int i=0;i<lowest3.length;i++) {
-	    	    	int r = lowest3[i] + 1;
-	    	    	Log.v("iBeacon", "minor beacon: "+r + ": " + ble_rad[lowest3[i]]);
-	    	    }
-	    	    Log.v("iBeacon", "----------------");
-	    	    ble_rad_prev = ble_rad;
-    	    	try {
-					userloc = trilateration(ibeacon_locations.getJSONArray(lowest3[0]).getInt(0),ibeacon_locations.getJSONArray(lowest3[0]).getInt(1),ibeacon_locations.getJSONArray(lowest3[1]).getInt(0),ibeacon_locations.getJSONArray(lowest3[1]).getInt(1),ibeacon_locations.getJSONArray(lowest3[2]).getInt(0),ibeacon_locations.getJSONArray(lowest3[2]).getInt(1), ble_rad[lowest3[0]],ble_rad[lowest3[1]],ble_rad[lowest3[2]]);
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    	    	userloc = forceHallways(userloc);
-				/*userloc[0] = ble_closestx;
-				userloc[1] = ble_closesty;*/
-	    		// Log.v("iBeacon", "X: "+userloc[0]+", Y: "+userloc[1]);
-	    	    //a += "ID: "+iBeacon.getMinor()+" | Rssi: "+(float)Math.round(iBeacon.getAccuracy()*1000)/1000 + "\n"; // + " | Prox: " + iBeacon.getProximity() +"\n";
-          	
-            
-            }}
-            });
+	        @Override 
+	        public void didRangeBeaconsInRegion(Collection<IBeacon> iBeacons, Region region) {
+	            if (iBeacons.size() > 0) {
+	            	Log.v("iBeacon", "iBeacon Collection Size: "+iBeacons.size());
+	            	ble_rad_prev = multitrilateration(iBeacons, ble_rad_prev);
+	            }
+	        }
+        });
 
         try {
             iBeaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
         } catch (RemoteException e) {   }
+    }
+    
+    private ArrayList<ble> multitrilateration(Collection<IBeacon> beacons, ArrayList<ble> ble_rad_prev2) {
+    	// write loop for trilateration
+    	ArrayList<IBeacon> aBeacons = new ArrayList<IBeacon>();
+    	for (IBeacon iBeacon : beacons) { 
+    		if (iBeacon.getMinor() > 0) {
+    			aBeacons.add(iBeacon);
+    		}
+    	}
+    	Log.v("iBeacon", "ArrayList Size : "+aBeacons.size());
+    	userloc[0] = 0;
+    	userloc[1] = 0;
+    	ArrayList<Integer[]> existing = new ArrayList<Integer[]>();
+    	List<Integer> xasdf = new ArrayList<Integer>();
+    	List<Integer> yasdf = new ArrayList<Integer>();
+    	int count = 0;
+    	for(int i=0;i<aBeacons.size();i++) {
+    		for(int j=0;j<aBeacons.size();j++) {
+    			for(int k=0;k<aBeacons.size();k++) {
+        			if (k != j && k != i && j != i) {
+        				boolean match = false;
+        				for(int g=0;g<existing.size();g++) {
+        					if (Arrays.asList(existing.get(g)).contains(i) && Arrays.asList(existing.get(g)).contains(j) && Arrays.asList(existing.get(g)).contains(k)) {
+        						match = true;
+        					}
+        				}
+        				if (!match) {
+	        				Integer[] d = new Integer[3];
+	        				d[0] = i;
+	        				d[1] = j;
+	        				d[2] = k;
+	        				existing.add(d);
+	        				double proxa = aBeacons.get(i).getAccuracy()*multiple;
+	        		    	double proxb = aBeacons.get(j).getAccuracy()*multiple;
+	        		    	double proxc = aBeacons.get(k).getAccuracy()*multiple;
+	        		    	for(int z=0;z<ble_rad_prev.size();z++) {
+	        		    		if (ble_rad_prev.get(i).id == aBeacons.get(i).getMinor()) {
+	        		    			if (ble_rad_prev.get(i).accuracy - aBeacons.get(i).getAccuracy()*multiple > 3)
+	        		    				proxa = aBeacons.get(i).getAccuracy()*multiple + 3;
+	        		    			else if (ble_rad_prev.get(i).accuracy - aBeacons.get(i).getAccuracy()*multiple < -3)
+	        		    				proxa = aBeacons.get(i).getAccuracy()*multiple - 3;
+	        		    			else
+	        		    				proxa = aBeacons.get(i).getAccuracy()*multiple;
+	        		    			
+	        		    			ble_rad_prev.get(i).accuracy = proxa;
+	        		    			//Log.v("iBeacon", "proxa: "+iBeacon.getAccuracy() + " | " + aBeacons.get(i).getAccuracy() + " | " + proxa);
+	        		    		}
+	        		    		
+	        		    		if (ble_rad_prev.get(j).accuracy == aBeacons.get(j).getMinor()) {
+	        		    			if (ble_rad_prev.get(j).accuracy - aBeacons.get(j).getAccuracy()*multiple > 3)
+	        		    				proxb = aBeacons.get(j).getAccuracy()*multiple + 3;
+	        		    			else if (ble_rad_prev.get(j).accuracy - aBeacons.get(j).getAccuracy()*multiple < -3)
+	        		    				proxb = aBeacons.get(j).getAccuracy()*multiple - 3;
+	        		    			else
+	        		    				proxb = aBeacons.get(j).getAccuracy()*multiple;
+	        		    			
+	        		    			ble_rad_prev.get(j).accuracy = proxb;
+	        		    		}
+	        		    		if (ble_rad_prev.get(k).accuracy == aBeacons.get(k).getMinor()) {
+	        		    			if (ble_rad_prev.get(k).accuracy - aBeacons.get(k).getAccuracy()*multiple > 3)
+	        		    				proxc = aBeacons.get(k).getAccuracy()*multiple + 3;
+	        		    			else if (ble_rad_prev.get(k).accuracy - aBeacons.get(k).getAccuracy()*multiple < -3)
+	        		    				proxc = aBeacons.get(k).getAccuracy()*multiple - 3;
+	        		    			else
+	        		    				proxc = aBeacons.get(k).getAccuracy()*multiple;
+	        		    			
+	        		    			ble_rad_prev.get(k).accuracy = proxc;
+	        		    		}
+	        		    	}
+	        		    	// Log.v("iBeacon","Prox ("+aBeacons.get(i).getMinor()+"): "+proxa);
+	        				int[] xy;
+							try {
+								if (proxa < 30*multiple && proxb < 30*multiple && proxc < 30*multiple) {
+									xy = trilateration(
+											ibeacon_locations.getJSONArray(aBeacons.get(i).getMinor()-1).getInt(0), 
+											ibeacon_locations.getJSONArray(aBeacons.get(i).getMinor()-1).getInt(1),
+											ibeacon_locations.getJSONArray(aBeacons.get(j).getMinor()-1).getInt(0),
+											ibeacon_locations.getJSONArray(aBeacons.get(j).getMinor()-1).getInt(1),
+											ibeacon_locations.getJSONArray(aBeacons.get(k).getMinor()-1).getInt(0),
+											ibeacon_locations.getJSONArray(aBeacons.get(k).getMinor()-1).getInt(1),
+											proxa,
+											proxb,
+											proxc
+										);
+									if (xy[0] > 0 && xy[1] > 0) {
+										xasdf.add(xy[0]);
+										yasdf.add(xy[1]);
+			    						//userloc[0] += xy[0];
+			    						//userloc[1] += xy[1];
+			    						Log.v("iBeacon", "xy "+aBeacons.get(i).getMinor()+"/"+aBeacons.get(j).getMinor()+"/"+aBeacons.get(k).getMinor()+": "+xy[0] + ", " + xy[1]);
+										// Log.v("iBeacon", "x ("+count+"): "+x[count]);
+			    						count++;
+			    						
+			    					}
+								}
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+        				}
+        			}
+        		}
+    		}
+    	}
+    	if (count > 0) {
+    		double medianx = 0;
+    		Collections.sort(xasdf);
+    		int middle = ((xasdf.size()) / 2);
+    		if(xasdf.size() % 2 == 0){
+    		 int medianA = xasdf.get(middle);
+    		 int medianB = xasdf.get(middle-1);
+    		 medianx = (medianA + medianB) / 2d;
+    		} else{
+    		 medianx = xasdf.get(middle);
+    		}
+    		
+    		double mediany = 0;
+    		Collections.sort(yasdf);
+    		middle = ((yasdf.size()) / 2);
+    		if(yasdf.size() % 2 == 0){
+    		 int medianA = yasdf.get(middle);
+    		 int medianB = yasdf.get(middle-1);
+    		 mediany = (medianA + medianB) / 2d;
+    		} else{
+    		 mediany = yasdf.get(middle);
+    		}
+	    	userloc[0] = (int) medianx;
+	    	userloc[1] = (int) mediany;
+    		//userloc[0] = userloc[0] / count;
+    		//userloc[1] = userloc[1] / count;
+	    	Log.v("iBeacon", "user location ("+count+"): "+userloc[0] + ", " + userloc[1]);
+    	}
+    	return ble_rad_prev;
     }
     
     private int[] forceHallways(int[] userloc) {
@@ -312,17 +394,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-/*    	mCamera = Camera.open();
-        Camera.Size previewSize = mCamera.getParameters().getPreviewSize();
-        mTextureView.setLayoutParams(new FrameLayout.LayoutParams(
-        previewSize.width, previewSize.height, Gravity.CENTER));
-        try {
-           mCamera.setPreviewTexture(surface);
-          } catch (IOException t) {
-          }
-        mCamera.startPreview();
-        mTextureView.setAlpha(1.0f);
-        mTextureView.setRotation(90.0f);*/
+
         mThread = new RenderingThread(mTextureView);
         mThread.start();
     	
@@ -407,20 +479,13 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
                 	
                     // canvas.drawRect(x, y, x + 20.0f, y + 20.0f, paint);
                     
-                    int[] min = {-1,-1};
-                    // maxx, maxy, minx, miny
-                    int[] bounds = {0,0,2000,2000};
-                    float minrad = 20000;
-                    double minval = 1;
-                    int userx = -10;
-                    int usery = -10;
-                    
+
                     for(int i=0;i<ibeacon_locations.length();i++) {
                     	if (ble_rad[i] > 0) {
 	                    	Paint p = makeRadGrad(ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1),ble_rad[i]);
-	                    	//c.drawCircle(ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1), ble_rad[i], p);
+	                    	c.drawCircle(ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1), ble_rad[i], p);
 	                    	// c.drawCircle(ble_locs[i][0], ble_locs[i][1], 20, ble);
-	                    	// canvas.drawCircle(ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1), ble_rad[i], p);
+	                    	 canvas.drawCircle(ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1), ble_rad[i], p);
                     	}
 	                    canvas.drawCircle(ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1), 5, ble); // still show iBeacon location even if no radius
                     	
@@ -465,15 +530,15 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
                     // Make sure marker is inside hallway bounds
                     
                     // double dist = Math.sqrt(Math.pow(userloc[1]-usery_prev,2)+Math.pow(userloc[0]-userx_prev,2));
-                    if (userloc[1] - usery_prev > 24) {
-                    	userloc[1] = usery_prev + 24;
-                    } else if (userloc[1] - usery_prev < - 24) {
-                    	userloc[1] = usery_prev - 24;
+                    if (userloc[1] - usery_prev > 5.24*multiple) {
+                    	userloc[1] = usery_prev + (int) Math.round(5.24*multiple);
+                    } else if (userloc[1] - usery_prev < - 5.24*multiple) {
+                    	userloc[1] = usery_prev - (int) Math.round(5.24*multiple);
                     }
-                    if (userloc[0] - userx_prev > 24) {
-                    	userloc[0] = userx_prev + 24;
-                    } else if (userloc[0] - userx_prev < - 24) {
-                    	userloc[0] = userx_prev - 24;
+                    if (userloc[0] - userx_prev > 5.24*multiple) {
+                    	userloc[0] = userx_prev + (int) Math.round(5.24*multiple);
+                    } else if (userloc[0] - userx_prev < - 5.24*multiple) {
+                    	userloc[0] = userx_prev - (int) Math.round(5.24*multiple);
                     }
                    /* if ((userloc[0]) < 600 && userloc[0] > 0 && userloc[1] < 450) {
                     	userloc[1] = 395;
@@ -522,7 +587,6 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     }
     public JSONArray loadJSONFromAsset() throws JSONException {
         String json = null;
-        Log.v("iBeacon", "test");
         try {
         	
             InputStream is = getAssets().open("beacon_locations.json");
@@ -543,10 +607,8 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
             // return null;
         }
         JSONArray jArray = new JSONArray(json);
-        Log.v("iBeacon", "Size: " + jArray.length());
-        /*        for(int i=0;i<jArray.length();i++){
-            Log.v("iBeacon",""+jArray.getJSONArray(i).getInt(0));
-	    }*/
+        // Log.v("iBeacon", "Size: " + jArray.length());
+    
         return jArray;
     }
     private void write2File(String data) throws IOException {
