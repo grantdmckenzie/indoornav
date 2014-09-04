@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,8 +30,10 @@ import com.radiusnetworks.ibeacon.IBeaconManager;
 import com.radiusnetworks.ibeacon.RangeNotifier;
 import com.radiusnetworks.ibeacon.Region;
 
+import android.app.ActionBar.LayoutParams;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -49,7 +52,11 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 public class MainActivity extends Activity implements IBeaconConsumer,TextureView.SurfaceTextureListener {
 	private TextureView mTextureView;
@@ -71,6 +78,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     private int prevx;
     private int prevy;
     private ble[] bleclusters;
+    private String participantID;
     // private static int[][] ble_locs = {{4*multiple,0},{0,0},{2*multiple,(int)(4*multiple)}};
 
     @SuppressWarnings("deprecation")
@@ -80,58 +88,87 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
         //Log.v("iBeacon", "onCreate");
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        View decorView = getWindow().getDecorView();
+        /*View decorView = getWindow().getDecorView();
 	     int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 	                   | View.SYSTEM_UI_FLAG_FULLSCREEN;
-	     decorView.setSystemUiVisibility(uiOptions);
+	     decorView.setSystemUiVisibility(uiOptions); */
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
         int height = size.y;
-		// setContentView(R.layout.main);
-        iBeaconManager.bind(this);
-        /*try {
-        	File myFile = new File("/sdcard/stats.txt");
-        	myFile.createNewFile();
-		    fOut = new FileOutputStream(myFile);
-		    myOutWriter = new OutputStreamWriter(fOut);
-	    	
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} */
-        
-        try {
-        	ibeacon_locations = loadJSONFromAsset();
-        	bleclusters = new ble[ibeacon_locations.length()];
-        	for(int i=0;i<ibeacon_locations.length();i++) {
-        		bleclusters[i] = new ble(i, ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1));
-        	}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        //Log.v("iBeacon", "onCreate");
-        FrameLayout content = new FrameLayout(this);
-
-        mTextureView = new TextureView(this);
-        // mTextureView.setOpaque(false);
-        //mTextureView.setBackgroundResource(R.drawable.floorplan_small);
-        // mTextureView.setAlpha(0.5f);
-        mTextureView.setSurfaceTextureListener(this);
-        
-        userloc = new int[]{500,500};
-        Bitmap floorplan1 = BitmapFactory.decodeResource(getResources(), R.drawable.floorplan_small);
-        floorplan = Bitmap.createScaledBitmap(floorplan1, 1200, 1920, true);
-        //mfloorplan = floorplan.copy(Bitmap.Config.ARGB_8888, true);
-        content.addView(mTextureView, new FrameLayout.LayoutParams(width,height, Gravity.TOP));
-        setContentView(content);
-        
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            	participantID = extras.getString("pid");
+				// setContentView(R.layout.main);
+		        iBeaconManager.bind(this);
+		        try {
+		        	File myFile = new File("/sdcard/IndoorNav/P"+participantID+".txt");
+		        	myFile.createNewFile();
+				    fOut = new FileOutputStream(myFile);
+				    myOutWriter = new OutputStreamWriter(fOut);
+			    	
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		        
+		        try {
+		        	ibeacon_locations = loadJSONFromAsset();
+		        	bleclusters = new ble[ibeacon_locations.length()];
+		        	for(int i=0;i<ibeacon_locations.length();i++) {
+		        		bleclusters[i] = new ble(i, ibeacon_locations.getJSONArray(i).getInt(0),ibeacon_locations.getJSONArray(i).getInt(1));
+		        	}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		        
+		        //Log.v("iBeacon", "onCreate");
+		        FrameLayout content = new FrameLayout(this);
+		
+		        mTextureView = new TextureView(this);
+		        // mTextureView.setOpaque(false);
+		        //mTextureView.setBackgroundResource(R.drawable.floorplan_small);
+		        // mTextureView.setAlpha(0.5f);
+		        mTextureView.setSurfaceTextureListener(this);
+		        
+		        userloc = new int[]{500,500};
+		        Bitmap floorplan1 = BitmapFactory.decodeResource(getResources(), R.drawable.floorplan_small);
+		        floorplan = Bitmap.createScaledBitmap(floorplan1, 1200, 1920, true);
+		        //mfloorplan = floorplan.copy(Bitmap.Config.ARGB_8888, true);
+		        content.addView(mTextureView, new FrameLayout.LayoutParams(width,height, Gravity.TOP));
+		        
+		        // ADD FINISH BUTTON
+		        RelativeLayout rl = new RelativeLayout(this);
+		        RelativeLayout.LayoutParams lay = new RelativeLayout.LayoutParams(
+		            RelativeLayout.LayoutParams.MATCH_PARENT, 
+		            RelativeLayout.LayoutParams.WRAP_CONTENT);
+		        lay.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		        Button finishButton = new Button(this);
+		        finishButton.setGravity(Gravity.CENTER);
+		        finishButton.setText("FINISH");
+		        finishButton.setWidth(300);
+		        rl.addView(finishButton, lay);
+		        LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		        content.addView(rl, lp);
+		        // END add FINISH button
+		        
+		        setContentView(content);
+		        
+		        
+		        finishButton.setOnClickListener(new OnClickListener() {
+		            public void onClick(View v) {
+		            	 
+		     	         Intent mapView = new Intent(MainActivity.this, FinishActivity.class);
+		     	         mapView.putExtra("pid", participantID);
+		     	         startActivity(mapView);
+		            }
+		        });
+        }
     }
     @Override 
     protected void onDestroy() {
@@ -252,6 +289,14 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
 		    	/*
 		    	userloc[0] = locx;
 		    	userloc[1] = locy;*/
+		    	Calendar c = Calendar.getInstance(); 
+		    	int seconds = c.get(Calendar.SECOND);
+		    	try {
+					write2File(seconds+","+userloc[0]+","+userloc[1]);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		    	prevx = userloc[0];
 		    	prevy = userloc[1];
     	}

@@ -4,14 +4,19 @@
 	 <uses-permission android:name="android.permission.BLUETOOTH"/>
 	 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 	 <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE"/>
+	 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <application android:allowBackup="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:theme="@style/AppTheme">
-        <activity android:label="@string/app_name" android:launchMode="singleTask" android:name="edu.ucsb.ble02.MainActivity" android:screenOrientation="portrait">
+        <activity android:label="@string/app_name" android:launchMode="singleTask" android:name="edu.ucsb.ble02.LoginActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:label="mainactivity" android:name="edu.ucsb.ble02.MainActivity" android:screenOrientation="portrait" android:theme="@style/AppTheme">
+	    </activity>
+	    <activity android:label="finishactivity" android:name="edu.ucsb.ble02.FinishActivity" android:screenOrientation="portrait" android:theme="@style/AppTheme">
+	    </activity>
     <service android:enabled="true" android:exported="true" android:isolatedProcess="false" android:label="iBeacon" android:name="com.radiusnetworks.ibeacon.service.IBeaconService">
     </service>
 
