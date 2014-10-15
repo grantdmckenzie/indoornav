@@ -64,7 +64,7 @@ public class ble {
 		    		return 0.0;
 		    	
 		    	// If the first two transmitters are not zero
-		    	else if (this.accuracy[0] != 0.0 && this.accuracy[1] != 00)
+		    	else if (this.accuracy[0] != 0.0 && this.accuracy[1] != 0.0)
 		    		return ((this.accuracy[0] + this.accuracy[1]) / 2);
 		    	
 		    	// If the first transmitter is zero

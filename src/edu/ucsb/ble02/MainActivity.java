@@ -232,11 +232,23 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     			} else if (iBeacon.getMinor() < 10 && iBeacon.getMinor() != 8) {
     				bleclusters[1].addDistance(iBeacon.getAccuracy() - 1);
     			} else if (iBeacon.getMinor() >= 10 && iBeacon.getMinor() < 14) {
-    				bleclusters[2].addDistance(iBeacon.getAccuracy() - 1);
+    				bleclusters[2].addDistance((iBeacon.getAccuracy() - 1)+2);
     			} else if (iBeacon.getMinor() >= 14 && iBeacon.getMinor() < 18) {
     				bleclusters[3].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 19 && iBeacon.getMinor() < 23) {
+    				bleclusters[4].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 23 && iBeacon.getMinor() < 27) {
+    				bleclusters[5].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 27 && iBeacon.getMinor() < 31) {
+    				bleclusters[6].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 31 && iBeacon.getMinor() < 35) {
+    				bleclusters[7].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 35 && iBeacon.getMinor() < 39) {
+    				bleclusters[8].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 39 && iBeacon.getMinor() < 43) {
+    				bleclusters[9].addDistance(iBeacon.getAccuracy() - 1);
     			}
-    			//Log.v("iBeacon", "Found: "+iBeacon.getMinor() + ", " + iBeacon.getAccuracy() + ", " + iBeacon.getProximity());
+    			Log.v("iBeacon", "Found: "+iBeacon.getMinor() + ", " + iBeacon.getAccuracy() + ", " + iBeacon.getProximity());
     		}
     	}
 
@@ -246,17 +258,19 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     	double mind2 = 4000;
     	
         for (int i=0;i<bleclusters.length;i++) {
-            if(bleclusters[i].getStableDistance() < mind2 && bleclusters[i].getStableDistance() >= mind1 && bleclusters[i].getStableDistance() != 0.0) {
-                minid2 = bleclusters[i].id;
-                mind2 = bleclusters[i].getStableDistance();
-            }
-            if (bleclusters[i].getStableDistance()<mind1){
-                mind2 = mind1;
-                minid2 = minid1;
-                minid1 = bleclusters[i].id;
-                mind1 = bleclusters[i].getStableDistance();
-            }
-            Log.v("iBeacon", "BLE Cluster: "+bleclusters[i].id + ", " + bleclusters[i].getStableDistance());
+        	if (bleclusters[i].getStableDistance() > 0.0) {
+	            if(bleclusters[i].getStableDistance() < mind2 && bleclusters[i].getStableDistance() >= mind1 && bleclusters[i].getStableDistance() != 0.0) {
+	                minid2 = bleclusters[i].id;
+	                mind2 = bleclusters[i].getStableDistance();
+	            }
+	            if (bleclusters[i].getStableDistance()<mind1){
+	                mind2 = mind1;
+	                minid2 = minid1;
+	                minid1 = bleclusters[i].id;
+	                mind1 = bleclusters[i].getStableDistance();
+	            }
+	            Log.v("iBeacon", "BLE Cluster: "+bleclusters[i].id + ", " + bleclusters[i].getStableDistance());
+        	}
         }
         Integer[] lowestValues = {minid1, minid2};
 		Log.v("iBeacon", "MIN IDS: " + Arrays.toString(lowestValues));
@@ -275,20 +289,48 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
 			    	locx = bleclusters[0].x - (int) diff;
 		    	} else if (Arrays.asList(lowestValues).contains(0) && Arrays.asList(lowestValues).contains(3)) {
 		    		double diff = bleclusters[0].getStableDistance() / (bleclusters[0].getStableDistance() + bleclusters[3].getStableDistance()) * 170;
-			    	locy = bleclusters[0].y+5;
+			    	locy = bleclusters[0].y;
 			    	locx = bleclusters[0].x + (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(3) && Arrays.asList(lowestValues).contains(4)) {
+		    		double diff = bleclusters[3].getStableDistance() / (bleclusters[3].getStableDistance() + bleclusters[4].getStableDistance()) * 170;
+			    	locy = bleclusters[3].y;
+			    	locx = bleclusters[3].x + (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(4) && Arrays.asList(lowestValues).contains(5)) {
+		    		double diff = bleclusters[4].getStableDistance() / (bleclusters[4].getStableDistance() + bleclusters[5].getStableDistance()) * 170;
+			    	locy = bleclusters[4].y;
+			    	locx = bleclusters[4].x + (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(5) && Arrays.asList(lowestValues).contains(6)) {
+		    		double diff = bleclusters[5].getStableDistance() / (bleclusters[5].getStableDistance() + bleclusters[6].getStableDistance()) * 170;
+			    	locy = bleclusters[5].y - (int) diff;
+			    	locx = bleclusters[5].x - 5;
+		    	} else if (Arrays.asList(lowestValues).contains(6) && Arrays.asList(lowestValues).contains(7)) {
+		    		double diff = bleclusters[6].getStableDistance() / (bleclusters[6].getStableDistance() + bleclusters[7].getStableDistance()) * 170;
+			    	locy = bleclusters[6].y;
+			    	locx = bleclusters[6].x - (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(7) && Arrays.asList(lowestValues).contains(8)) {
+		    		double diff = bleclusters[7].getStableDistance() / (bleclusters[7].getStableDistance() + bleclusters[8].getStableDistance()) * 170;
+			    	locy = bleclusters[7].y;
+			    	locx = bleclusters[7].x - (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(8) && Arrays.asList(lowestValues).contains(1)) {
+		    		double diff = bleclusters[8].getStableDistance() / (bleclusters[8].getStableDistance() + bleclusters[1].getStableDistance()) * 170;
+			    	locy = bleclusters[8].y;
+			    	locx = bleclusters[8].x - (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(9) && Arrays.asList(lowestValues).contains(1)) {
+		    		double diff = bleclusters[9].getStableDistance() / (bleclusters[9].getStableDistance() + bleclusters[1].getStableDistance()) * 170;
+			    	locy = bleclusters[1].y;
+			    	locx = bleclusters[1].x - (int) diff;
 		    	}
 		    	
 		    	// max movement
-		    	if (locx - prevx > 20) userloc[0] = prevx + 20;
-		    	else if (locx - prevx < -20) userloc[0] = prevx - 20;
+		    	/* if (locx - prevx > 25) userloc[0] = prevx + 25;
+		    	else if (locx - prevx < -25) userloc[0] = prevx - 25;
 		    	else userloc[0] = locx;
-		    	if (locy - prevy > 20) userloc[1] = prevy + 20;
-		    	else if (locy - prevy < -20) userloc[1] = prevy - 20;
-		    	else userloc[1] = locy;
-		    	/*
+		    	if (locy - prevy > 25) userloc[1] = prevy + 25;
+		    	else if (locy - prevy < -25) userloc[1] = prevy - 25;
+		    	else userloc[1] = locy; */
+		    	
 		    	userloc[0] = locx;
-		    	userloc[1] = locy;*/
+		    	userloc[1] = locy;
 		    	Calendar c = Calendar.getInstance(); 
 		    	int seconds = c.get(Calendar.SECOND);
 		    	try {
