@@ -70,7 +70,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     private static int[] userloc;
     //private static int[][] ble_locs = {{(int)(4*multiple),0},{0, 3*multiple},{(int)(4*multiple),6*multiple},{0, 9*multiple},{(int)(4*multiple),12*multiple},{0, 15*multiple},{4*multiple, 18*multiple},{0, 21*multiple},{4*multiple, 24*multiple}};
     private static JSONArray ibeacon_locations;
-    private static float[] ble_rad = new float[21];
+    private static float[] ble_rad = new float[24];
     private static ArrayList<ble> ble_rad_prev = new ArrayList<ble>();
     private static Bitmap floorplan;
     public OutputStreamWriter myOutWriter;
@@ -247,8 +247,34 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     				bleclusters[8].addDistance(iBeacon.getAccuracy() - 1);
     			} else if (iBeacon.getMinor() >= 39 && iBeacon.getMinor() < 43) {
     				bleclusters[9].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 43 && iBeacon.getMinor() < 47) {
+    				bleclusters[10].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 47 && iBeacon.getMinor() < 50) {
+    				bleclusters[11].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 51 && iBeacon.getMinor() < 55) {
+    				bleclusters[12].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 55 && iBeacon.getMinor() < 59) {
+    				bleclusters[13].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 59 && iBeacon.getMinor() < 63) {
+    				bleclusters[14].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 63 && iBeacon.getMinor() < 67) {
+    				bleclusters[15].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 67 && iBeacon.getMinor() < 71) {
+    				bleclusters[16].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 71 && iBeacon.getMinor() < 75) {
+    				bleclusters[17].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 75 && iBeacon.getMinor() < 79) {
+    				bleclusters[18].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 79 && iBeacon.getMinor() < 83) {
+    				bleclusters[19].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 83 && iBeacon.getMinor() < 87) {
+    				bleclusters[20].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 87 && iBeacon.getMinor() < 91) {
+    				bleclusters[21].addDistance(iBeacon.getAccuracy() - 1);
+    			} else if (iBeacon.getMinor() >= 91 && iBeacon.getMinor() < 95) {
+    				bleclusters[22].addDistance(iBeacon.getAccuracy() - 1);
     			}
-    			Log.v("iBeacon", "Found: "+iBeacon.getMinor() + ", " + iBeacon.getAccuracy() + ", " + iBeacon.getProximity());
+    			// Log.v("iBeacon", "Found: "+iBeacon.getMinor() + ", " + iBeacon.getAccuracy() + ", " + iBeacon.getProximity());
     		}
     	}
 
@@ -269,11 +295,12 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
 	                minid1 = bleclusters[i].id;
 	                mind1 = bleclusters[i].getStableDistance();
 	            }
-	            Log.v("iBeacon", "BLE Cluster: "+bleclusters[i].id + ", " + bleclusters[i].getStableDistance());
+	            // Log.v("iBeacon", "BLE Cluster: "+bleclusters[i].id + ", " + bleclusters[i].getStableDistance());
         	}
         }
         Integer[] lowestValues = {minid1, minid2};
 		Log.v("iBeacon", "MIN IDS: " + Arrays.toString(lowestValues));
+		Log.v("iBeacon", "MIN VALS: " + mind1 + ", " + mind2);
 
     	if (!Arrays.asList(lowestValues).contains(2147483647)) {
 		    	
@@ -317,8 +344,71 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
 			    	locx = bleclusters[8].x - (int) diff;
 		    	} else if (Arrays.asList(lowestValues).contains(9) && Arrays.asList(lowestValues).contains(1)) {
 		    		double diff = bleclusters[9].getStableDistance() / (bleclusters[9].getStableDistance() + bleclusters[1].getStableDistance()) * 170;
-			    	locy = bleclusters[1].y;
-			    	locx = bleclusters[1].x - (int) diff;
+			    	locy = bleclusters[9].y;
+			    	locx = bleclusters[9].x + (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(10) && Arrays.asList(lowestValues).contains(9)) {
+		    		double diff = bleclusters[10].getStableDistance() / (bleclusters[10].getStableDistance() + bleclusters[9].getStableDistance()) * 170;
+			    	locy = bleclusters[10].y;
+			    	locx = bleclusters[10].x + (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(11) && Arrays.asList(lowestValues).contains(10)) {
+		    		double diff = bleclusters[11].getStableDistance() / (bleclusters[11].getStableDistance() + bleclusters[10].getStableDistance()) * 170;
+			    	locy = bleclusters[11].y- (int) diff;
+			    	locx = bleclusters[11].x; 
+		    	} else if (Arrays.asList(lowestValues).contains(11) && Arrays.asList(lowestValues).contains(2)) {
+		    		double diff = bleclusters[11].getStableDistance() / (bleclusters[11].getStableDistance() + bleclusters[2].getStableDistance()) * 170;
+			    	locy = bleclusters[11].y;
+			    	locx = bleclusters[11].x + (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(11) && Arrays.asList(lowestValues).contains(12)) {
+		    		double diff = bleclusters[11].getStableDistance() / (bleclusters[11].getStableDistance() + bleclusters[12].getStableDistance()) * 170;
+			    	locy = bleclusters[11].y;
+			    	locx = bleclusters[11].x - (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(12) && Arrays.asList(lowestValues).contains(13)) {
+		    		double diff = bleclusters[12].getStableDistance() / (bleclusters[12].getStableDistance() + bleclusters[13].getStableDistance()) * 180;
+			    	locy = bleclusters[12].y  + (int) diff;
+			    	locx = bleclusters[12].x;
+		    	} else if (Arrays.asList(lowestValues).contains(14) && Arrays.asList(lowestValues).contains(13)) {
+		    		double diff = bleclusters[13].getStableDistance() / (bleclusters[14].getStableDistance() + bleclusters[13].getStableDistance()) * 180;
+			    	locy = bleclusters[13].y  + (int) diff;
+			    	locx = bleclusters[13].x;
+		    	} else if (Arrays.asList(lowestValues).contains(15) && Arrays.asList(lowestValues).contains(14)) {
+		    		double diff = bleclusters[14].getStableDistance() / (bleclusters[14].getStableDistance() + bleclusters[15].getStableDistance()) * 180;
+			    	locy = bleclusters[14].y  + (int) diff;
+			    	locx = bleclusters[14].x;
+		    	} else if (Arrays.asList(lowestValues).contains(16) && Arrays.asList(lowestValues).contains(15)) {
+		    		double diff = bleclusters[15].getStableDistance() / (bleclusters[15].getStableDistance() + bleclusters[16].getStableDistance()) * 180;
+			    	locy = bleclusters[15].y  + (int) diff;
+			    	locx = bleclusters[15].x;
+		    	} else if (Arrays.asList(lowestValues).contains(17) && Arrays.asList(lowestValues).contains(16)) {
+		    		double diff = bleclusters[16].getStableDistance() / (bleclusters[17].getStableDistance() + bleclusters[16].getStableDistance()) * 180;
+			    	locy = bleclusters[16].y  + (int) diff;
+			    	locx = bleclusters[16].x;
+		    	} else if (Arrays.asList(lowestValues).contains(18) && Arrays.asList(lowestValues).contains(17)) {
+		    		double diff = bleclusters[17].getStableDistance() / (bleclusters[18].getStableDistance() + bleclusters[17].getStableDistance()) * 170;
+			    	locy = bleclusters[17].y;
+			    	locx = bleclusters[17].x  + (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(19) && Arrays.asList(lowestValues).contains(19)) {
+		    		double diff = bleclusters[18].getStableDistance() / (bleclusters[19].getStableDistance() + bleclusters[18].getStableDistance()) * 180;
+			    	locy = bleclusters[18].y - (int) diff;
+			    	locx = bleclusters[18].x;
+		    	} else if (Arrays.asList(lowestValues).contains(20) && Arrays.asList(lowestValues).contains(19)) {
+		    		double diff = bleclusters[19].getStableDistance() / (bleclusters[20].getStableDistance() + bleclusters[19].getStableDistance()) * 180;
+			    	locy = bleclusters[19].y - (int) diff;
+			    	locx = bleclusters[19].x;
+		    	} else if (Arrays.asList(lowestValues).contains(21) && Arrays.asList(lowestValues).contains(20)) {
+		    		double diff = bleclusters[20].getStableDistance() / (bleclusters[20].getStableDistance() + bleclusters[21].getStableDistance()) * 180;
+			    	locy = bleclusters[20].y - (int) diff;
+			    	locx = bleclusters[20].x;
+		    	} else if (Arrays.asList(lowestValues).contains(22) && Arrays.asList(lowestValues).contains(21)) {
+		    		double diff = bleclusters[21].getStableDistance() / (bleclusters[22].getStableDistance() + bleclusters[21].getStableDistance()) * 180;
+			    	locy = bleclusters[21].y - (int) diff;
+			    	locx = bleclusters[21].x;
+		    	} else if (Arrays.asList(lowestValues).contains(22) && Arrays.asList(lowestValues).contains(11)) {
+		    		double diff = bleclusters[11].getStableDistance() / (bleclusters[22].getStableDistance() + bleclusters[22].getStableDistance()) * 180;
+			    	locy = bleclusters[11].y + (int) diff;
+			    	locx = bleclusters[11].x;
+		    	} else {
+		    		locx = userloc[0];
+		    		locy = userloc[1];
 		    	}
 		    	
 		    	// max movement
