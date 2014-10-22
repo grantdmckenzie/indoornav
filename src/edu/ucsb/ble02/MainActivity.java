@@ -79,6 +79,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     private int prevy;
     private ble[] bleclusters;
     private String participantID;
+    private int counter;
     // private static int[][] ble_locs = {{4*multiple,0},{0,0},{2*multiple,(int)(4*multiple)}};
 
     @SuppressWarnings("deprecation")
@@ -97,6 +98,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
         display.getSize(size);
         int width = size.x;
         int height = size.y;
+        counter = 0;
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             	participantID = extras.getString("pid");
@@ -222,7 +224,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     }
     
     private void multitrilateration(Collection<IBeacon> beacons) {
- 
+    	counter++;
     	for (IBeacon iBeacon : beacons) { 
     		if (iBeacon.getMinor() > 0) {
     				//stats.addValue(iBeacon.getAccuracy());
@@ -232,7 +234,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
     			} else if (iBeacon.getMinor() < 10 && iBeacon.getMinor() != 8) {
     				bleclusters[1].addDistance(iBeacon.getAccuracy() - 1);
     			} else if (iBeacon.getMinor() >= 10 && iBeacon.getMinor() < 14) {
-    				bleclusters[2].addDistance((iBeacon.getAccuracy() - 1)+2);
+    				bleclusters[2].addDistance(iBeacon.getAccuracy() - 1);
     			} else if (iBeacon.getMinor() >= 14 && iBeacon.getMinor() < 18) {
     				bleclusters[3].addDistance(iBeacon.getAccuracy() - 1);
     			} else if (iBeacon.getMinor() >= 19 && iBeacon.getMinor() < 23) {
@@ -302,20 +304,29 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
 		Log.v("iBeacon", "MIN IDS: " + Arrays.toString(lowestValues));
 		Log.v("iBeacon", "MIN VALS: " + mind1 + ", " + mind2);
 
+		//int locx = 550;
+    	// int locy = 550;
+    	
     	if (!Arrays.asList(lowestValues).contains(2147483647)) {
 		    	
-		    	int locx = 550;
-		    	int locy = 550;
+    		int locx = userloc[0];
+    		int locy = userloc[1];
 		    	if (Arrays.asList(lowestValues).contains(0) && Arrays.asList(lowestValues).contains(1)) {
 		    		double diff = bleclusters[0].getStableDistance() / (bleclusters[0].getStableDistance() + bleclusters[1].getStableDistance()) * 170;
 			    	locx = bleclusters[0].x;
 			    	locy = bleclusters[0].y - (int) diff;
+		    	} else if (Arrays.asList(lowestValues).contains(19) && Arrays.asList(lowestValues).contains(11)) {
+		    		// DO NOTHING.  BUG
+		    	} else if (Arrays.asList(lowestValues).contains(19) && Arrays.asList(lowestValues).contains(22)) {
+		    		// DO NOTHING.  BUG
+		    	} else if (Arrays.asList(lowestValues).contains(19) && Arrays.asList(lowestValues).contains(21)) {
+		    		// DO NOTHING.  BUG
 		    	} else if (Arrays.asList(lowestValues).contains(0) && Arrays.asList(lowestValues).contains(2)) {
 		    		double diff = bleclusters[0].getStableDistance() / (bleclusters[0].getStableDistance() + bleclusters[2].getStableDistance()) * 170;
 			    	locy = bleclusters[0].y+5;
 			    	locx = bleclusters[0].x - (int) diff;
 		    	} else if (Arrays.asList(lowestValues).contains(0) && Arrays.asList(lowestValues).contains(3)) {
-		    		double diff = bleclusters[0].getStableDistance() / (bleclusters[0].getStableDistance() + bleclusters[3].getStableDistance()) * 170;
+		    		double diff = bleclusters[0].getStableDistance() / (bleclusters[0].getStableDistance() + bleclusters[3].getStableDistance()) * 150;
 			    	locy = bleclusters[0].y;
 			    	locx = bleclusters[0].x + (int) diff;
 		    	} else if (Arrays.asList(lowestValues).contains(3) && Arrays.asList(lowestValues).contains(4)) {
@@ -371,7 +382,7 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
 			    	locy = bleclusters[13].y  + (int) diff;
 			    	locx = bleclusters[13].x;
 		    	} else if (Arrays.asList(lowestValues).contains(15) && Arrays.asList(lowestValues).contains(14)) {
-		    		double diff = bleclusters[14].getStableDistance() / (bleclusters[14].getStableDistance() + bleclusters[15].getStableDistance()) * 180;
+		    		double diff = bleclusters[14].getStableDistance() / (bleclusters[15].getStableDistance() + bleclusters[14].getStableDistance()) * 180;
 			    	locy = bleclusters[14].y  + (int) diff;
 			    	locx = bleclusters[14].x;
 		    	} else if (Arrays.asList(lowestValues).contains(16) && Arrays.asList(lowestValues).contains(15)) {
@@ -410,17 +421,19 @@ public class MainActivity extends Activity implements IBeaconConsumer,TextureVie
 		    		locx = userloc[0];
 		    		locy = userloc[1];
 		    	}
-		    	
+		    	// Log.v("iBeacon","loc:"+locx + ","+locy);
 		    	// max movement
-		    	/* if (locx - prevx > 25) userloc[0] = prevx + 25;
-		    	else if (locx - prevx < -25) userloc[0] = prevx - 25;
-		    	else userloc[0] = locx;
-		    	if (locy - prevy > 25) userloc[1] = prevy + 25;
-		    	else if (locy - prevy < -25) userloc[1] = prevy - 25;
-		    	else userloc[1] = locy; */
-		    	
-		    	userloc[0] = locx;
-		    	userloc[1] = locy;
+		    	if(counter > 10) {
+			    	if (locx - prevx > 25) userloc[0] = prevx + 25;
+			    	else if (locx - prevx < -25) userloc[0] = prevx - 25;
+			    	else userloc[0] = locx;
+			    	if (locy - prevy > 25) userloc[1] = prevy + 25;
+			    	else if (locy - prevy < -25) userloc[1] = prevy - 25;
+			    	else userloc[1] = locy;
+		    	} else {
+		    		userloc[0] = locx;
+		    		userloc[1] = locy;
+		    	}
 		    	Calendar c = Calendar.getInstance(); 
 		    	int seconds = c.get(Calendar.SECOND);
 		    	try {

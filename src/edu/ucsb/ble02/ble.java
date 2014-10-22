@@ -39,6 +39,8 @@ public class ble {
 			
 	    	Arrays.sort(this.accuracy);
 	    	
+	    	// return (this.accuracy[0] + this.accuracy[1])/ 2.0;
+	    	
 	    	if (prevmed > 0.0 && prevmed < 600) {
 		    	// If all transmitters are 0
 		    	if (this.accuracy[0] == 0 && this.accuracy[1] == 0 && this.accuracy[2] == 0 && this.accuracy[3] == 0)
@@ -79,6 +81,6 @@ public class ble {
 		    	else 
 		    		return (this.accuracy[3]);
 	    		
-	    	}
+	    	} 
 	}
 }
